@@ -1,0 +1,8 @@
+name: CastleSiege
+version: '${project.version}'
+main: dev.foxikle.castlesiege.CastleSiege
+api-version: 1.19
+website: foxikle.dev
+commands:
+  test:
+    description: Creates the platform -- For now

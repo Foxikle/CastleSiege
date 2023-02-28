@@ -1,0 +1,71 @@
+#    _____          _   _         _____ _                        _____             __ _
+#  / ____|        | | | |       / ____(_)                       / ____|           / _(_)
+# | |     __ _ ___| |_| | ___  | (___  _  ___  __ _  ___       | |     ___  _ __ | |_ _  __ _
+# | |    / _` / __| __| |/ _ \  \___ \| |/ _ \/ _` |/ _ \      | |    / _ \| '_ \|  _| |/ _` |
+# | |___| (_| \__ \ |_| |  __/  ____) | |  __/ (_| |  __/      | |___| (_) | | | | | | | (_| |
+#  \_____\__,_|___/\__|_|\___| |_____/|_|\___|\__, |\___|       \_____\___/|_| |_|_| |_|\__, |
+#                                              __/ |                                     __/ |
+#                                             |___/                                     |___/
+# Welcome to the Castle Siege Config file. There are a few rules when editing YML files.
+# 1. NEVER, EVER use tabs. Always use 2 spaces.
+# 2. A '#' means the line is commented out. The server will ignore the line.
+# 3. If you delete a portion of the config, you can delete the 'config.yml' and a new one
+#    will be automatically generated on the next server restart.
+# ---------------------------------------------------------------------------------------
+
+
+#SpawnPlatformCenter: -> the center of the spawn platform.
+SpawnPlatformCenterX: 0
+SpawnPlatformCenterY: 96
+SpawnPlatformCenterZ: 0
+worldName: lobby1
+
+# Blue Base
+BBX: 13.5
+BBY: 16.5
+BBZ: -93.5
+BBYAW: 0
+BBPITCH: 0
+BBWarriorX: 8.5
+BBWarriorY: 14
+BBWarriorZ: -89.5
+BBTankX: 8.5
+BBTankY: 14
+BBTankZ: -87.5
+BBArcherX: 8.5
+BBArcherY: 14
+BBArcherZ: -85.5
+BBWidth: 5
+BBHeight: 7
+BBGateX: 15.5
+BBGateY: 15
+BBGateZ: -38.5
+BBGateHologramX: 13.5
+BBGateHologramY: 18
+BBGateHologramZ: -37
+BBGateHealth: 300
+
+# Red Base
+RBX: 20.5
+RBY: 15.5
+RBZ: 100.5
+RBYAW: 180
+RBPITCH: 0
+RBWarriorX: 3.5
+RBWarriorY: 13
+RBWarriorZ: 82.5
+RBTankX: 4.5
+RBTankY: 13
+RBTankZ: 80.5
+RBArcherX: 5.5
+RBArcherY: 13
+RBArcherZ: 78.5
+RBWidth: 13
+RBHeight: 5
+RBGateX: 21.5
+RBGateY: 13.0
+RBGateZ: 66.5
+RBGateHologramX: 15.5
+RBGateHologramY: 17
+RBGateHologramZ: 63
+RBGateHealth: 450
