@@ -1,4 +1,4 @@
-package dev.foxikle.castlesiege.managers;
+package dev.foxikle.castlesiege.commands;
 
 import dev.foxikle.castlesiege.CastleSiege;
 import dev.foxikle.castlesiege.GameState;
@@ -11,15 +11,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class testCommand implements CommandExecutor, TabExecutor {
+public class TestCommand implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
@@ -82,7 +81,7 @@ public class testCommand implements CommandExecutor, TabExecutor {
                             world.spawnEntity(new Location(world, 35.5, 25, -60), EntityType.EVOKER_FANGS);
                         } else if (args[0].equalsIgnoreCase("stands")) {
                             player.sendMessage(ChatColor.GREEN + "Summoning Stands!");
-                            CastleSiege.getInstance().getWorldManager().summonClassStands();
+                            CastleSiege.getInstance().getWorldManager().summonClassNPCs();
                         } else if (args[0].equalsIgnoreCase("removestands")) {
                             CastleSiege.getInstance().getWorldManager().removeRedHitbox();
                             CastleSiege.getInstance().getWorldManager().removeBlueHitbox();
@@ -155,15 +154,25 @@ public class testCommand implements CommandExecutor, TabExecutor {
             completions.add("blueteam");
             completions.add("removestands");
             completions.add("gamestate");
-
+            completions.add("bLaunch");
+            completions.add("rLaunch");
+            completions.add("rCatapult");
+            completions.add("bCatapult");
+            completions.add("song");
             return completions;
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("hitbox")) {
-            List<String> completions = new ArrayList<>();
-            completions.add("B");
-            completions.add("R");
-            completions.add("BOTH");
-            return completions;
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("hitbox")) {
+                List<String> completions = new ArrayList<>();
+                completions.add("B");
+                completions.add("R");
+                completions.add("BOTH");
+                return completions;
+            } else if (args[0].equalsIgnoreCase("song")) {
+                File file = new File("plugins/CastleSiege/songs/");
+                sender.sendMessage(file.list());
+                return List.of(file.list());
+            }
         }
         return new ArrayList<>();
     }

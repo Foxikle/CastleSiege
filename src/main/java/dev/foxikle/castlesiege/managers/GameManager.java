@@ -2,21 +2,24 @@ package dev.foxikle.castlesiege.managers;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.xxmicloxx.NoteBlockAPI.model.FadeType;
+import com.xxmicloxx.NoteBlockAPI.songplayer.Fade;
 import dev.foxikle.castlesiege.CastleSiege;
 import dev.foxikle.castlesiege.Class;
 import dev.foxikle.castlesiege.GameState;
 import dev.foxikle.castlesiege.Items;
 import dev.foxikle.castlesiege.tasks.ScheduleCleanupTask;
 import dev.foxikle.castlesiege.tasks.VotingMenuTask;
-import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.server.level.ServerPlayer;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -27,7 +30,6 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Team;
-import org.codehaus.plexus.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -48,8 +50,8 @@ public class GameManager {
     private Team red;
     private boolean pvp = false;
     private Team blue;
-    private ArmorStand bBHHoloGram;
-    private ArmorStand rBHHoloGram;
+    private TextDisplay bBHHoloGram;
+    private TextDisplay rBHHoloGram;
     private Player blueKing;
     private Player redKing;
     private ItemStack crown;
@@ -102,26 +104,22 @@ public class GameManager {
         if (gs == gameState) return;
         gameState = gs;
         switch (gs) {
-            case PREWAITING:
+            case PREWAITING -> {
                 plugin.getWorldManager().createSpawnPlatform();
-                plugin.getWorldManager().summonClassStands();
-                break;
-            case WAITING:
-                pvp = false;
-
-                break;
-            case VOTING:
+                plugin.getWorldManager().summonClassNPCs();
+            }
+            case WAITING -> pvp = false;
+            case VOTING -> {
+                plugin.getMusicManager().globalPlayer.setPlaying(false, new Fade(FadeType.LINEAR, 60));
                 setupTeams();
                 Bukkit.getOnlinePlayers().forEach(player -> player.getInventory().clear());
                 List<Player> lobbyPlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
                 List<Team> teams = Arrays.asList(blue, red);
-
-
                 int numTeams = teams.size();
                 for (int i = 0; i < lobbyPlayers.size(); i++) {
                     Team t = teams.get(i % numTeams);
                     t.addEntry(lobbyPlayers.get(i).getName());
-                    if(t == blue){
+                    if (t == blue) {
                         blueTeamPlayers.add(lobbyPlayers.get(i));
                     } else if (t == red) {
                         redTeamPlayers.add(lobbyPlayers.get(i));
@@ -143,18 +141,14 @@ public class GameManager {
                 plugin.getWorldManager().removeSpawnPlatform();
                 VotingMenuTask task = new VotingMenuTask(10, this);
                 task.runTaskTimer(plugin, 10, 20);
-                break;
-            case PRESIEGE:
+            }
+            case PRESIEGE -> {
                 plugin.getWorldManager().addBlueGateHologram();
                 plugin.getWorldManager().addRedGateHologram();
-                break;
-            case SIEGE:
-                this.pvp = true;
-                break;
-            case VICTORY:
+            }
+            case SIEGE -> this.pvp = true;
+            case VICTORY -> {
                 this.pvp = false;
-                plugin.getWorldManager().removeRedHitbox();
-                plugin.getWorldManager().removeBlueHitbox();;
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     plugin.getScoreboardUtils().updateScoreboard(player);
                     player.sendTitle(ChatColor.GOLD + "GAME ENDED", "", 15, 50, 15);
@@ -162,25 +156,27 @@ public class GameManager {
                 ScheduleCleanupTask cleanupTask = new ScheduleCleanupTask();
                 cleanupTask.runTaskLater(plugin, 100);
                 sendEndingMessage();
-                break;
-            case CLEANUP:
-                red.getEntries().forEach(entry -> red.removeEntry(entry));
-                blue.getEntries().forEach(entry -> blue.removeEntry(entry));
-                Bukkit.getOnlinePlayers().forEach(player -> player.setPlayerListName(player.getName()));
+            }
+            case CLEANUP -> {
+                if(Bukkit.getScoreboardManager().getMainScoreboard().getObjective("health") != null)
+                    Bukkit.getScoreboardManager().getMainScoreboard().getObjective("health").unregister();
+                if(red != null)
+                    red.getEntries().forEach(entry -> red.removeEntry(entry));
+                if(blue != null)
+                    blue.getEntries().forEach(entry -> blue.removeEntry(entry));
+                Bukkit.getOnlinePlayers().forEach(player -> {
+                    player.setPlayerListName(player.getName());
+                    player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20);
+                });
                 Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer("Server is restarting"));
                 removeGateHolograms();
-                World world = Bukkit.getWorld(CastleSiege.getInstance().getConfig().getString("worldName"));
-                world.getEntities().forEach(entity -> {
-                    if (entity.getType() == EntityType.ARMOR_STAND || entity.getScoreboardTags().contains("ClassStand")) {
-                        entity.remove();
-                    }
-                });
+                plugin.getWorldManager().removeInteractables();
                 plugin.getWorldManager().pasteBGate();
                 plugin.getWorldManager().pasteRGate();
-                plugin.getWorldManager().addRedHitbox();
-                plugin.getWorldManager().addBlueHitbox();
+                plugin.getWorldManager().addRedCatapultStand();
+                plugin.getWorldManager().addBlueCatapultStand();
                 setGameState(GameState.PREWAITING);
-                break;
+            }
         }
         Bukkit.getOnlinePlayers().forEach(player -> plugin.getScoreboardUtils().updateScoreboard(player));
     }
@@ -223,8 +219,8 @@ public class GameManager {
 
     private void teleportToBase() {
         FileConfiguration config = plugin.getConfig();
-        Location red = new Location(Bukkit.getWorld(config.getString("worldName")), config.getDouble("RBX"), config.getDouble("RBY"), config.getDouble("RBZ"), config.getInt("RBYAW"), config.getInt("RBPITCH"));
-        Location blue = new Location(Bukkit.getWorld(config.getString("worldName")), config.getDouble("BBX"), config.getDouble("BBY"), config.getDouble("BBZ"), config.getInt("BBYAW"), config.getInt("BBPITCH"));
+        Location red = config.getLocation("RBSpawn");
+        Location blue = config.getLocation("BBSpawn");
 
         for (Player p : redTeamPlayers) {
             p.sendMessage(ChatColor.YELLOW + "You are on the" + ChatColor.RED + " RED " + ChatColor.YELLOW + "team.");
@@ -240,11 +236,10 @@ public class GameManager {
 
     public void teleportToBase(Player player, ChatColor team) {
         FileConfiguration config = plugin.getConfig();
-        Location red = new Location(Bukkit.getWorld(config.getString("worldName")), config.getDouble("RBX"), config.getDouble("RBY"), config.getDouble("RBZ"), config.getInt("RBYAW"), config.getInt("RBPITCH"));
-        Location blue = new Location(Bukkit.getWorld(config.getString("worldName")), config.getDouble("BBX"), config.getDouble("BBY"), config.getDouble("BBZ"), config.getInt("BBYAW"), config.getInt("BBPITCH"));
+        Location red = config.getLocation("RBSpawn");
+        Location blue = config.getLocation("BBSpawn");
 
         if (team == ChatColor.RED) player.teleport(red);
-
         if (team == ChatColor.BLUE) player.teleport(blue);
     }
 
@@ -287,6 +282,18 @@ public class GameManager {
                 inv.setBoots(Items.getRedBoots());
             }
             classes.put(player, Class.ARCHER);
+        } else if (kit == Class.WIZARD) {
+            inv.addItem(Items.getWoodSword());
+            inv.addItem(Items.getBow());
+            inv.addItem(new ItemStack(Material.ARROW, 64));
+            if (getTeamColor(player) == ChatColor.BLUE) {
+                inv.setHelmet(Items.getBlueHelmet());
+                inv.setBoots(Items.getBlueBoots());
+            } else {
+                inv.setHelmet(Items.getRedHelmet());
+                inv.setBoots(Items.getRedBoots());
+            }
+            classes.put(player, Class.WIZARD);
         }
         if (player == this.blueKing || player == this.redKing) {
             inv.setHelmet(crown);
@@ -316,7 +323,7 @@ public class GameManager {
         headMeta.setDisplayName(player.getName());
 
         GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-        EntityPlayer cp = ((CraftPlayer) player).getHandle();
+        ServerPlayer cp = ((CraftPlayer) player).getHandle();
         GameProfile gameProfile = cp.getBukkitEntity().getProfile();
         Property property = gameProfile.getProperties().get("textures").iterator().next();
         profile.getProperties().put("textures", new Property("textures", property.getValue()));
@@ -461,40 +468,40 @@ public class GameManager {
         return classes.getOrDefault(player, Class.WARRIOR);
     }
 
-    public ArmorStand getbBHHoloGram() {
+    public TextDisplay getbBHHoloGram() {
         return bBHHoloGram;
     }
 
-    public void setbBHHoloGram(ArmorStand bBHHoloGram) {
+    public void setbBHHoloGram(TextDisplay bBHHoloGram) {
         this.bBHHoloGram = bBHHoloGram;
     }
 
-    public ArmorStand getrBHHoloGram() {
+    public TextDisplay getrBHHoloGram() {
         return rBHHoloGram;
     }
 
-    public void setrBHHoloGram(ArmorStand rBHHoloGram) {
+    public void setrBHHoloGram(TextDisplay rBHHoloGram) {
         this.rBHHoloGram = rBHHoloGram;
     }
 
     public void updateBlueGateHologram() {
         if (bGateHealth == -1) {
-            int max = plugin.getConfig().getInt("BBGateHealth");
+            int max = plugin.getConfig().getInt("GateHealth");
             bGateHealth = max;
-            bBHHoloGram.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Blue Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + max + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("BBGateHealth") + ChatColor.GRAY + ")");
+            bBHHoloGram.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Blue Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + max + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("GateHealth") + ChatColor.GRAY + ")");
             return;
         }
-        bBHHoloGram.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Blue Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + bGateHealth + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("BBGateHealth") + ChatColor.GRAY + ")");
+        bBHHoloGram.setCustomName(ChatColor.BLUE + "" + ChatColor.BOLD + "Blue Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + bGateHealth + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("GateHealth") + ChatColor.GRAY + ")");
     }
 
     public void updateRedGateHologram() {
         if (rGateHealth == -1) {
-            int max = plugin.getConfig().getInt("RBGateHealth");
+            int max = plugin.getConfig().getInt("GateHealth");
             rGateHealth = max;
-            rBHHoloGram.setCustomName(ChatColor.RED + "" + ChatColor.BOLD + "Red Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + max + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("RBGateHealth") + ChatColor.GRAY + ")");
+            rBHHoloGram.setCustomName(ChatColor.RED + "" + ChatColor.BOLD + "Red Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + max + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("GateHealth") + ChatColor.GRAY + ")");
             return;
         }
-        rBHHoloGram.setCustomName(ChatColor.RED + "" + ChatColor.BOLD + "Red Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + rGateHealth + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("RBGateHealth") + ChatColor.GRAY + ")");
+        rBHHoloGram.setCustomName(ChatColor.RED + "" + ChatColor.BOLD + "Red Gate " + ChatColor.RESET + "" + ChatColor.GRAY + "(" + ChatColor.GREEN + rGateHealth + ChatColor.GRAY + "/" + ChatColor.GREEN + plugin.getConfig().getInt("GateHealth") + ChatColor.GRAY + ")");
     }
 
     public void addSpectator(Player player) {
@@ -571,8 +578,10 @@ public class GameManager {
         return pvp;
     }
     public void removeGateHolograms(){
-        bBHHoloGram.remove();
-        rBHHoloGram.remove();
+        if(bBHHoloGram != null)
+            bBHHoloGram.remove();
+        if(rBHHoloGram != null)
+            rBHHoloGram.remove();
     }
 
     public Player getBlueKing() {
