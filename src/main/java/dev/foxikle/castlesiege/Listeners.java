@@ -16,9 +16,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.tags.CustomItemTagContainer;
 import org.bukkit.inventory.meta.tags.ItemTagType;
@@ -28,8 +27,9 @@ import java.util.UUID;
 import static org.bukkit.Material.AIR;
 
 public class Listeners implements Listener {
-    private GameManager manager = CastleSiege.getInstance().getGameManager();
-    private CastleSiege plugin = CastleSiege.getInstance();
+    private final GameManager manager = CastleSiege.getInstance().getGameManager();
+    private final CastleSiege plugin = CastleSiege.getInstance();
+
     @EventHandler
     public void OnInventoryClick(InventoryClickEvent e) {
         if (e.getCurrentItem() == null) return;
@@ -74,37 +74,9 @@ public class Listeners implements Listener {
     }
 
     @EventHandler
-    public void onClickEntity(PlayerInteractAtEntityEvent e) {
-        if (e.getRightClicked().getType() == EntityType.ARMOR_STAND) {
-            ArmorStand entity = (ArmorStand) e.getRightClicked();
-            if (!entity.getScoreboardTags().isEmpty()) {
-                if (!manager.getClasses().containsKey(e.getPlayer())) {
-                    Player player = e.getPlayer();
-                    if (entity.getScoreboardTags().contains("ClassStand")) {
-                        if (entity.getScoreboardTags().contains("bTank")) {
-                            manager.giveKit(player, Class.TANK);
-                            player.sendMessage(ChatColor.GREEN + "You selected the tank class!");
-                        } else if (entity.getScoreboardTags().contains("bWarrior")) {
-                            manager.giveKit(player, Class.WARRIOR);
-                            player.sendMessage(ChatColor.GREEN + "You selected the warrior class!");
-                        } else if (entity.getScoreboardTags().contains("bArcher")) {
-                            manager.giveKit(player, Class.ARCHER);
-                            player.sendMessage(ChatColor.GREEN + "You selected the archer class!");
-                        } else if (entity.getScoreboardTags().contains("rTank")) {
-                            manager.giveKit(player, Class.TANK);
-                            player.sendMessage(ChatColor.GREEN + "You selected the tank class!");
-                        } else if (entity.getScoreboardTags().contains("rWarrior")) {
-                            manager.giveKit(player, Class.WARRIOR);
-                            player.sendMessage(ChatColor.GREEN + "You selected the warrior class!");
-                        } else if (entity.getScoreboardTags().contains("rArcher")) {
-                            manager.giveKit(player, Class.ARCHER);
-                            player.sendMessage(ChatColor.GREEN + "You selected the archer class!");
-                        }
-                    } else {
-                        e.getPlayer().sendMessage(ChatColor.RED + "You've already selected the " + manager.getClasses().get(e.getPlayer()) + " class!");
-                    }
-                }
-            }
+    public void onJoin(PlayerJoinEvent event) {
+        if(plugin.getGameManager().getGameState() == GameState.PREWAITING || plugin.getGameManager().getGameState() == GameState.WAITING) {
+            plugin.getMusicManager().getGlobalPlayer().addPlayer(event.getPlayer());
         }
     }
 
@@ -261,7 +233,6 @@ public class Listeners implements Listener {
                 if (stand.getScoreboardTags().contains("BBGate")) {
                     if(player.getGameMode() == GameMode.CREATIVE){
                         plugin.getWorldManager().knockDownBlueGate();
-                        plugin.getWorldManager().removeBlueHitbox();
                         manager.setbGateHealth(0);
                         manager.updateBlueGateHologram();
                         manager.setbGate(false);
@@ -280,7 +251,6 @@ public class Listeners implements Listener {
                         manager.setbGateHealth(manager.getbGateHealth() - (int) e.getDamage());
                         if (manager.getbGateHealth() <= 0) {
                             plugin.getWorldManager().knockDownBlueGate();
-                            plugin.getWorldManager().removeBlueHitbox();
                             manager.setbGate(false);
                             Bukkit.broadcastMessage(ChatColor.YELLOW + "The " + ChatColor.BLUE + "" + ChatColor.BOLD + "BLUE " + ChatColor.RESET + "" + ChatColor.YELLOW + "gate was destroyed by " + manager.getTeamColor(player) + player.getName() + ChatColor.YELLOW + "!");
                             manager.getBlueTeamPlayers().forEach(player1 -> {
@@ -339,7 +309,6 @@ public class Listeners implements Listener {
                             manager.setbGateHealth(manager.getbGateHealth()-(int) e.getDamage());
                             if (manager.getbGateHealth() <= 0) {
                                 plugin.getWorldManager().knockDownBlueGate();
-                                plugin.getWorldManager().removeBlueHitbox();
                                 manager.setbGate(false);
                                 Bukkit.broadcastMessage(ChatColor.YELLOW + "The " + ChatColor.BLUE + "" + ChatColor.BOLD + "BLUE " + ChatColor.RESET + "" + ChatColor.YELLOW + "gate was destroyed by " + manager.getTeamColor(player) + player.getName() + ChatColor.YELLOW + "!");
                                 manager.getBlueTeamPlayers().forEach(player1 -> {

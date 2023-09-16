@@ -15,57 +15,241 @@
 
 
 #SpawnPlatformCenter: -> the center of the spawn platform.
-SpawnPlatformCenterX: 0
-SpawnPlatformCenterY: 96
-SpawnPlatformCenterZ: 0
-worldName: lobby1
+SpawnPlatformCenter:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 0
+  y: 96
+  z: 0
+  pitch: 0
+  yaw: 0
 
-# Blue Base
-BBX: 13.5
-BBY: 16.5
-BBZ: -93.5
-BBYAW: 0
-BBPITCH: 0
-BBWarriorX: 8.5
-BBWarriorY: 14
-BBWarriorZ: -89.5
-BBTankX: 8.5
-BBTankY: 14
-BBTankZ: -87.5
-BBArcherX: 8.5
-BBArcherY: 14
-BBArcherZ: -85.5
-BBWidth: 5
-BBHeight: 7
-BBGateX: 15.5
-BBGateY: 15
-BBGateZ: -38.5
-BBGateHologramX: 13.5
-BBGateHologramY: 18
-BBGateHologramZ: -37
-BBGateHealth: 300
+GateHealth: 250
 
-# Red Base
-RBX: 20.5
-RBY: 15.5
-RBZ: 100.5
-RBYAW: 180
-RBPITCH: 0
-RBWarriorX: 3.5
-RBWarriorY: 13
-RBWarriorZ: 82.5
-RBTankX: 4.5
-RBTankY: 13
-RBTankZ: 80.5
-RBArcherX: 5.5
-RBArcherY: 13
-RBArcherZ: 78.5
-RBWidth: 13
-RBHeight: 5
-RBGateX: 21.5
-RBGateY: 13.0
-RBGateZ: 66.5
-RBGateHologramX: 15.5
-RBGateHologramY: 17
-RBGateHologramZ: 63
-RBGateHealth: 450
+##############################
+#  --  RED BASE THINGSs  --  #
+##############################
+RBSpawn:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 7.5
+  y: 18
+  z: 99.5
+  pitch: 0
+  yaw: 180
+
+# Class NPCs
+
+RBTank:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: -10.5
+  y: 15
+  z: 82.5
+  pitch: 0
+  yaw: -90
+RBWarrior:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: -9.5
+  y: 15
+  z: 80.5
+  pitch: 0
+  yaw: -90
+RBArcher:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: -8.5
+  y: 15
+  z: 78.5
+  pitch: 0
+  yaw: -90
+RBWizard:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: -7.5
+  y: 15
+  z: 76.5
+  pitch: 0
+  yaw: -90
+
+  # Catapult stuff
+
+RBCatapultNPC:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 18.5
+  y: 16
+  z: 74.5
+  pitch: 0
+  yaw: -118
+RBCatapultLaunch:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 20.5
+  y: 16
+  z: 74.5
+  pitch: 0
+  yaw: 180
+RBCatapultMid:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 18.5
+  y: 29.8
+  z: 61
+  pitch: 0
+  yaw: 0
+RBCatapultEnd:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 12.5
+  y: 15
+  z: 49.5
+  pitch: 0
+  yaw: 180
+
+# Gate stuff
+
+RBGateHologram:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 2.5
+  y: 17
+  z: 62.5
+  pitch: 0
+  yaw: 180
+
+RBGateTop:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 8
+  y: 19
+  z: 65
+  pitch: 0
+  yaw: 0
+
+RBGateBottom:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: -4
+  y: 15
+  z: 65
+  pitch: 0
+  yaw: 0
+
+
+##############################
+#  --  BLUE BASE THINGS  --  #
+##############################
+
+BBSpawn:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 12.5
+  y: 19
+  z: -110.5
+  pitch: 0
+  yaw: 0
+
+# Class NPCs
+
+BBTank:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 30.5
+  y: 16
+  z: -93.5
+  pitch: 0
+  yaw: 90
+BBWarrior:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 29.5
+  y: 16
+  z: -91.5
+  pitch: 0
+  yaw: 90
+BBArcher:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 28.5
+  y: 16
+  z: -89.5
+  pitch: 0
+  yaw: 90
+BBWizard:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 27.5
+  y: 16
+  z: -87.5
+  pitch: 0
+  yaw: 90
+
+  # Catapult stuff
+
+BBCatapultNPC:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 1.5
+  y: 17
+  z: -85.5
+  pitch: 0
+  yaw: -118
+BBCatapultLaunch:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: -0.5
+  y: 16
+  z: -85.5
+  pitch: 0
+  yaw: 180
+BBCatapultMid:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 1.85
+  y: 29.8
+  z: -72
+  pitch: 0
+  yaw: 0
+BBCatapultEnd:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 7.5
+  y: 15
+  z: -61.5
+  pitch: 0
+  yaw: 180
+
+# Gate stuff
+
+BBGateHologram:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 17.5
+  y: 18
+  z: -75.5
+  pitch: 0
+  yaw: 180
+
+BBGateTop:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 11
+  y: 20
+  z: -77
+  pitch: 0
+  yaw: 0
+
+BBGateBottom:
+  ==: org.bukkit.Location
+  world: lobby1
+  x: 23
+  y: 16
+  z: -77
+  pitch: 0
+  yaw: 0
+
+
+
+

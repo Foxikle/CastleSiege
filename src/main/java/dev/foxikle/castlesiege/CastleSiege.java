@@ -1,13 +1,14 @@
 package dev.foxikle.castlesiege;
 
+import dev.foxikle.castlesiege.commands.ClassCommand;
+import dev.foxikle.castlesiege.commands.TestCommand;
 import dev.foxikle.castlesiege.managers.GameManager;
+import dev.foxikle.castlesiege.managers.MusicManager;
 import dev.foxikle.castlesiege.managers.ScoreboardUtils;
 import dev.foxikle.castlesiege.managers.WorldManager;
-import dev.foxikle.castlesiege.managers.testCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -18,17 +19,22 @@ public final class CastleSiege extends JavaPlugin implements Listener {
 
     private GameManager gameManager;
     private WorldManager worldManager;
+    private MusicManager musicManager;
     private static CastleSiege instance;
     private ScoreboardUtils scoreboardUtils;
 
     @Override
     public void onEnable() {
+        this.saveResource("config.yml", false);
+        this.saveResource("lobbymusic.nbs", false);
         gameManager = new GameManager(this);
         worldManager = new WorldManager(this);
+        musicManager = new MusicManager(this);
+        musicManager.setup("lobbymusic.nbs");
         instance = this;
         scoreboardUtils = new ScoreboardUtils(this);
-        getCommand("test").setExecutor(new testCommand());
-        this.saveResource("config.yml", false);
+        getCommand("test").setExecutor(new TestCommand());
+        getCommand("class").setExecutor(new ClassCommand(this));
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -65,6 +71,10 @@ public final class CastleSiege extends JavaPlugin implements Listener {
         return scoreboardUtils;
     }
 
+    public MusicManager getMusicManager() {
+        return musicManager;
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         if(gameManager.getGameState() == GameState.PREWAITING)
@@ -73,9 +83,11 @@ public final class CastleSiege extends JavaPlugin implements Listener {
         scoreboardUtils.updateScoreboard(e.getPlayer());
         e.getPlayer().getInventory().clear();
         e.getPlayer().setGameMode(GameMode.ADVENTURE);
-        e.getPlayer().teleport(new Location(Bukkit.getWorld(this.getConfig().getString("worldName")), this.getConfig().getDouble("SpawnPlatformCenterX"), this.getConfig().getDouble("SpawnPlatformCenterY") + 3.5, this.getConfig().getDouble("SpawnPlatformCenterZ")));
+        e.getPlayer().teleport(getConfig().getLocation("SpawnPlatformCenter").add(0, 6, 0));
         if(Bukkit.getOnlinePlayers().size() >= 10) gameManager.setGameState(GameState.WAITING);
         e.getPlayer().setPlayerListHeader(ChatColor.translateAlternateColorCodes('&', "&b You are playing on &e&lALPHA.FOXIKLE.DEV&b.\n"));
         e.getPlayer().setPlayerListFooter(ChatColor.translateAlternateColorCodes('&', "\n&b Found a bug or exploit? \n &eReport it at &5discord.gg/6YrUX3djex&b!"));
     }
+
+
 }

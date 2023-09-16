@@ -24,7 +24,7 @@ public class GameStartCountdownTask extends BukkitRunnable {
         if(timeLeft <= 0){
             cancel();
             manager.setGameState(GameState.VOTING);
-            CastleSiege.getInstance().getWorldManager().summonClassStands();
+            CastleSiege.getInstance().getWorldManager().summonClassNPCs();
             return;
         }
 
